@@ -4,6 +4,7 @@ import com.faculdade.gestormax.model.Produto;
 import com.faculdade.gestormax.repository.ClienteRepository;
 import com.faculdade.gestormax.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class ProdutoController {
         return produtoRepositoryRepository.findAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/consultar/{id}")
     public Produto getById(@PathVariable Long id) {
         return produtoRepositoryRepository.findById(id).orElse(null);
     }
@@ -29,14 +30,17 @@ public class ProdutoController {
         return produtoRepositoryRepository.save(produto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/editar/{id}")
     public Produto update(@PathVariable Long id, @RequestBody Produto produto) {
         produto.setId_produto(id);
         return produtoRepositoryRepository.save(produto);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        produtoRepositoryRepository.deleteById(id);
+    @DeleteMapping("/deletar/{id}")
+    public ResponseEntity<Object> deletar(@PathVariable Long id) {
+        return produtoRepositoryRepository.findById(id).map(produto -> {
+            produtoRepositoryRepository.delete(produto);
+            return ResponseEntity.noContent().build();
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

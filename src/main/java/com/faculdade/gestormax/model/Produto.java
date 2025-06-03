@@ -8,7 +8,9 @@ import java.util.List;
 @Entity
 @Data
 public class Produto {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_produto;
 
     private String nome;
