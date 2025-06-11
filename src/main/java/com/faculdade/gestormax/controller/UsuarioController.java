@@ -17,29 +17,29 @@ import java.util.Optional;
 public class UsuarioController {
 
     @Autowired
-    UsuarioRepository usuarioRepositoryRepository;
+    UsuarioRepository usuarioRepository;
 
     @GetMapping("/consultar")
     public List<Usuario> consultar() {
-        return usuarioRepositoryRepository.findAll();
+        return usuarioRepository.findAll();
     }
 
     @PostMapping("/cadastrar")
     @ResponseStatus(HttpStatus.CREATED)
     public Usuario cadastrar(@RequestBody Usuario usuario) {
-        return usuarioRepositoryRepository.save(usuario);
+        return usuarioRepository.save(usuario);
     }
 
     @GetMapping("/consulta/{id}")
     public ResponseEntity<Usuario> consultarPorId(@PathVariable Long id) {
-        Optional<Usuario> usuario = usuarioRepositoryRepository.findById(id);
+        Optional<Usuario> usuario = usuarioRepository.findById(id);
         return usuario.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/editar/{id}")
     public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado) {
-        return usuarioRepositoryRepository.findById(id).map(usuarioExistente -> {
+        return usuarioRepository.findById(id).map(usuarioExistente -> {
             // --- AQUI ESTÃO AS ATUALIZAÇÕES DOS ATRIBUTOS ---
             // 1. Atualiza o nome do usuário
             usuarioExistente.setNomeUsuario(usuarioAtualizado.getNomeUsuario());
@@ -61,7 +61,7 @@ public class UsuarioController {
             // que foi usado para buscá-lo do banco de dados, e o método .save() fará um UPDATE.
 
             // 4. Salva o objeto 'usuarioExistente' (agora com os dados atualizados) no banco de dados.
-            Usuario atualizado = usuarioRepositoryRepository.save(usuarioExistente);
+            Usuario atualizado = usuarioRepository.save(usuarioExistente);
 
             // 5. Retorna uma resposta HTTP 200 OK com o usuário atualizado no corpo.
             return ResponseEntity.ok(atualizado);
@@ -74,8 +74,8 @@ public class UsuarioController {
 
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Object> deletar(@PathVariable Long id) {
-        return usuarioRepositoryRepository.findById(id).map(usuario -> {
-            usuarioRepositoryRepository.delete(usuario);
+        return usuarioRepository.findById(id).map(usuario -> {
+            usuarioRepository.delete(usuario);
             return ResponseEntity.noContent().build();
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
