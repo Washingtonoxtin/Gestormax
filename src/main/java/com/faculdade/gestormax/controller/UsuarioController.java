@@ -2,6 +2,7 @@ package com.faculdade.gestormax.controller;
 
 import com.faculdade.gestormax.model.Usuario;
 import com.faculdade.gestormax.repository.UsuarioRepository;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.HttpStatus;
@@ -37,14 +38,38 @@ public class UsuarioController {
     }
 
     @PutMapping("/editar/{id}")
-    public <usuario> ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado) {
-        return usuarioRepositoryRepository.findById(id).map(usuario -> {
-            usuario.setNomeUsuario(usuarioAtualizado.getNomeUsuario()); // Atualiza os campos necessários
-            usuario.setNomeUsuario(usuarioAtualizado.getNomeUsuario());
-            // adiciona outros campos conforme necessário
-            Usuario atualizado = usuarioRepositoryRepository.save(usuario);
+    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado) {
+        return usuarioRepositoryRepository.findById(id).map(usuarioExistente -> {
+            // --- AQUI ESTÃO AS ATUALIZAÇÕES DOS ATRIBUTOS ---
+            // 1. Atualiza o nome do usuário
+            usuarioExistente.setNomeUsuario(usuarioAtualizado.getNomeUsuario());
+
+            // 2. Atualiza o email do usuário
+            usuarioExistente.setEmail(usuarioAtualizado.getEmail());
+
+            // 3. Atualiza a senha do usuário
+            // ATENÇÃO: Esta é uma área crítica de segurança!
+            // Em uma aplicação real, você NUNCA deve salvar a senha diretamente como vem da requisição.
+            // Você DEVE aplicar um algoritmo de hash (ex: BCrypt) antes de salvar a senha.
+            // Além disso, é comum verificar se a nova senha não é nula ou vazia antes de atualizar.
+            if (usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isEmpty()) {
+                // TODO: Criptografe a senha aqui (ex: com BCryptPasswordEncoder.encode()) antes de setar!
+                usuarioExistente.setSenha(usuarioAtualizado.getSenha());
+            }
+
+            // O 'id_Usuario' não precisa ser setado novamente, pois 'usuarioExistente' já possui o ID correto
+            // que foi usado para buscá-lo do banco de dados, e o método .save() fará um UPDATE.
+
+            // 4. Salva o objeto 'usuarioExistente' (agora com os dados atualizados) no banco de dados.
+            Usuario atualizado = usuarioRepositoryRepository.save(usuarioExistente);
+
+            // 5. Retorna uma resposta HTTP 200 OK com o usuário atualizado no corpo.
             return ResponseEntity.ok(atualizado);
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+        }).orElseGet(() -> {
+            // Se o usuário com o ID fornecido não for encontrado no banco de dados,
+            // retorna uma resposta HTTP 404 Not Found.
+            return ResponseEntity.notFound().build();
+        });
     }
 
     @DeleteMapping("/deletar/{id}")

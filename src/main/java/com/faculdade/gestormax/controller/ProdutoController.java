@@ -20,7 +20,7 @@ public class ProdutoController {
         return produtoRepositoryRepository.findAll();
     }
 
-    @GetMapping("/consultar/{id}")
+    @GetMapping("/consulta/{id}")
     public Produto getById(@PathVariable Long id) {
         return produtoRepositoryRepository.findById(id).orElse(null);
     }
